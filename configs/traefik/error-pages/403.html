@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 - Access Forbidden</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --background-color: #f9f9f9;
+            --text-color: #333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+        }
+        
+        .error-container {
+            max-width: 600px;
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .error-code {
+            font-size: 120px;
+            font-weight: 700;
+            color: var(--primary-color);
+            line-height: 1;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .error-code:after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: var(--accent-color);
+            border-radius: 2px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+        }
+        
+        p {
+            font-size: 18px;
+            margin-bottom: 25px;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .illustration {
+            margin-bottom: 30px;
+            font-size: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="illustration">🔒</div>
+        <div class="error-code">403</div>
+        <h1>Access Forbidden</h1>
+        <p>You don't have permission to access this resource. Please check your credentials or contact the administrator.</p>
+        <a href="/" class="btn">Return Home</a>
+    </div>
+</body>
+</html> 

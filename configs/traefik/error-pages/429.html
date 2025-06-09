@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>429 - Too Many Requests</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --background-color: #f9f9f9;
+            --text-color: #333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+        }
+        
+        .error-container {
+            max-width: 600px;
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .error-code {
+            font-size: 120px;
+            font-weight: 700;
+            color: var(--primary-color);
+            line-height: 1;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .error-code:after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: var(--accent-color);
+            border-radius: 2px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+        }
+        
+        p {
+            font-size: 18px;
+            margin-bottom: 25px;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .illustration {
+            margin-bottom: 30px;
+            font-size: 80px;
+        }
+        
+        .timer {
+            background: #f0f0f0;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: var(--accent-color);
+            display: inline-block;
+            margin: 15px 0;
+        }
+        
+        .tip {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: rgba(52, 152, 219, 0.1);
+            border-radius: 8px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="illustration">⏱️</div>
+        <div class="error-code">429</div>
+        <h1>Too Many Requests</h1>
+        <p>You've made too many requests in a short period of time. Please slow down and try again later.</p>
+        
+        <div class="timer">
+            Try again in <span id="countdown">60</span> seconds
+        </div>
+        
+        <div class="tip">
+            <strong>Tip:</strong> Consider upgrading to a premium account for higher rate limits.
+        </div>
+        
+        <a href="/" class="btn">Return Home</a>
+    </div>
+    
+    <script>
+        // Simple countdown timer
+        let seconds = 60;
+        const countdownEl = document.getElementById('countdown');
+        
+        const timer = setInterval(() => {
+            seconds--;
+            countdownEl.textContent = seconds;
+            
+            if (seconds <= 0) {
+                clearInterval(timer);
+                location.reload();
+            }
+        }, 1000);
+    </script>
+</body>
+</html> 

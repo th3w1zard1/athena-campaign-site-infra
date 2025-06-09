@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  error-pages:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: error-pages
+    hostname: error-pages
+    networks:
+      - proxy
+    volumes:
+      - .:/usr/local/apache2/htdocs:ro
+    restart: always
+
+networks:
+  proxy:
+    external: true

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate Limit Exceeded | Service Access</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #64748b;
+            --background-color: #f8fafc;
+            --text-color: #334155;
+            --error-color: #ef4444;
+            --success-color: #10b981;
+            --border-color: #e2e8f0;
+            --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            flex-grow: 1;
+        }
+        
+        header {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .main-content {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+        
+        h2 {
+            font-size: 1.4rem;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--secondary-color);
+        }
+        
+        p {
+            margin-bottom: 1rem;
+        }
+        
+        .warning-box {
+            background-color: #fff7ed;
+            border-left: 4px solid #fb923c;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .info-box {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: var(--font-family);
+            font-size: 1rem;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+        
+        button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+        }
+        
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d1fae5;
+            border: 1px solid #34d399;
+            color: #065f46;
+        }
+        
+        .alert-error {
+            background-color: #fee2e2;
+            border: 1px solid #f87171;
+            color: #b91c1c;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        footer {
+            background-color: white;
+            box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem 0;
+            margin-top: auto;
+        }
+        
+        footer p {
+            text-align: center;
+            margin-bottom: 0;
+            color: var(--secondary-color);
+            font-size: 0.875rem;
+        }
+        
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .main-content {
+                padding: 1.5rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="/" class="logo">ServiceName</a>
+        </div>
+    </header>
+    
+    <div class="container">
+        <main class="main-content">
+            <h1>Rate Limit Exceeded</h1>
+            
+            <div class="warning-box">
+                <p><strong>Your access to this service has been temporarily limited.</strong> This is a protective measure to ensure our services remain available and responsive for all users.</p>
+            </div>
+            
+            <p>We've detected an unusually high number of requests from your IP address. To maintain optimal performance and ensure fair usage for all users, we've implemented rate limiting on our public API.</p>
+            
+            <h2>Why was I rate limited?</h2>
+            <p>Our public API currently allows:</p>
+            <ul>
+                <li><strong>30 requests per minute</strong> with a burst allowance of up to 20 requests</li>
+            </ul>
+            <p>Once this limit is reached, your access is temporarily restricted to protect our infrastructure and ensure everyone gets a fair share of resources.</p>
+            
+            <h2>How can I get more access?</h2>
+            <div class="info-box">
+                <p>Registered users enjoy higher rate limits with:</p>
+                <ul>
+                    <li><strong>100 requests per minute</strong> with a burst allowance of up to 50 requests</li>
+                    <li>Priority access to our services</li>
+                    <li>Enhanced support options</li>
+                </ul>
+            </div>
+            
+            <h2>Request an Account</h2>
+            <p>Fill out the form below to request an account with higher rate limits:</p>
+            
+            <div class="alert alert-success" id="success-message">
+                Your account request has been submitted successfully. We'll review your request and contact you soon.
+            </div>
+            
+            <div class="alert alert-error" id="error-message">
+                There was an error submitting your request. Please try again later.
+            </div>
+            
+            <form id="account-request-form">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="organization">Organization (Optional)</label>
+                    <input type="text" id="organization" name="organization">
+                </div>
+                
+                <div class="form-group">
+                    <label for="usage">Intended API Usage</label>
+                    <select id="usage" name="usage" required>
+                        <option value="">Please select...</option>
+                        <option value="personal">Personal Use</option>
+                        <option value="academic">Academic/Research</option>
+                        <option value="commercial">Commercial Application</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="request_details">Additional Details</label>
+                    <textarea id="request_details" name="request_details" placeholder="Please describe your use case and expected request volume..."></textarea>
+                </div>
+                
+                <button type="submit" id="submit-button">Submit Account Request</button>
+            </form>
+            
+            <h2>When will I regain access?</h2>
+            <p>Public API access automatically resumes when your request rate falls below the threshold. This usually happens within a minute if you reduce your request frequency.</p>
+            
+            <h2>Need immediate assistance?</h2>
+            <p>If you're experiencing an urgent issue, please contact our support team at <a href="mailto:support@example.com">support@example.com</a> with details about your use case.</p>
+        </main>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 ServiceName. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('account-request-form');
+            const successMessage = document.getElementById('success-message');
+            const errorMessage = document.getElementById('error-message');
+            const submitButton = document.getElementById('submit-button');
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Disable button and show loading state
+                submitButton.disabled = true;
+                submitButton.innerHTML = 'Submitting...';
+                
+                // Collect form data
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+                
+                // In a production environment, you would send this data to your API
+                // This is a simulation for demonstration purposes
+                setTimeout(function() {
+                    // Simulate successful submission
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = 'Submit Account Request';
+                    
+                    // Show success message
+                    successMessage.style.display = 'block';
+                    successMessage.classList.add('fade-in');
+                    
+                    // Reset form
+                    form.reset();
+                    
+                    // Scroll to success message
+                    successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Hide success message after 5 seconds
+                    setTimeout(function() {
+                        successMessage.style.display = 'none';
+                    }, 5000);
+                    
+                    // In production, replace this with actual API call:
+                    /*
+                    fetch('/api/account-requests', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = 'Submit Account Request';
+                        successMessage.style.display = 'block';
+                        successMessage.classList.add('fade-in');
+                        form.reset();
+                        successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        setTimeout(() => {
+                            successMessage.style.display = 'none';
+                        }, 5000);
+                    })
+                    .catch(error => {
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = 'Submit Account Request';
+                        errorMessage.style.display = 'block';
+                        errorMessage.classList.add('fade-in');
+                        errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        setTimeout(() => {
+                            errorMessage.style.display = 'none';
+                        }, 5000);
+                    });
+                    */
+                }, 1500);
+            });
+        });
+    </script>
+</body>
+</html> 

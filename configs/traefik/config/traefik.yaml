@@ -1,0 +1,100 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
+
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: false
+
+providers:
+  file:
+    directory: /config  # /config/traefik.yaml (this file)
+    watch: true
+  docker:
+    exposedByDefault: false
+    watch: true
+    network: publicnet
+    #        useBindPortIP: true
+#  swarm:
+#    exposedByDefault: false
+#    watch: true
+#    network: swarmnet
+#        useBindPortIP: true
+#  kubernetesIngress: {}
+
+log:
+  level: DEBUG
+
+api:
+  dashboard: true
+  debug: false # Enable additional endpoints for debugging and profiling (default: false)
+  disableDashboardAd: true # Disable the advertisement from the dashboard (default: false)
+  insecure: true # Enable the API and the dashboard on the entryPoint named traefik (default: false)
+
+ping:
+  terminatingStatusCode: 503 # Terminating status code (Default: 503)
+serversTransport:
+  insecureSkipVerify: true
+
+accessLog: {}
+
+entryPoints:
+  web:
+    address: :80
+    forwardedHeaders:
+      trustedIPs:
+        - "127.0.0.1/32"     # localhost (ipv4)
+        - "::1/128"          # localhost (ipv6)
+        - "172.16.0.0/12"    # docker network
+        - "10.76.0.0/16"     # docker 'publicnet' network
+        - "100.64.0.0/10"    # tailscale network
+#        - "149.130.221.93"   # micklethefickle oracle cloud vps
+#        - "207.211.189.95"   # beatapostapita oracle cloud vps
+#        - "152.117.108.32"   # wizard-pc
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+  websecure:
+    address: :443
+    forwardedHeaders:
+      trustedIPs:
+        - "127.0.0.1/32"     # localhost (ipv4)
+        - "::1/128"          # localhost (ipv6)
+        - "172.16.0.0/12"    # docker network
+        - "10.76.0.0/16"     # docker 'publicnet' network
+        - "100.64.0.0/10"    # tailscale network
+#        - "149.130.221.93"   # micklethefickle oracle cloud vps
+#        - "207.211.189.95"   # beatapostapita oracle cloud vps
+#        - "152.117.108.32"   # wizard-pc
+    http:
+      tls:
+        certResolver: athena_duckdns_letsencrypt
+        domains:
+          - main: "athenaforeugene.duckdns.org"
+            sans:
+              - "*.athenaforeugene.duckdns.org"
+
+# Multiple DNS challenge provider are not supported with Traefik, but you can use CNAME to handle that.
+# For example, if you have example.org (account foo) and example.com (account bar) you can create a CNAME on
+# example.org called _acme-challenge.example.org pointing to challenge.example.com. This way, you can obtain
+# certificates for example.org with the bar account.
+
+# Define common DNS resolvers at the top of your file
+x-dns-resolvers: &dns-resolvers
+  - 1.1.1.1
+  - 1.0.0.1
+  - 8.8.8.8
+  - 8.8.4.4
+
+certificatesResolvers:
+  athena_duckdns_letsencrypt:
+    acme:
+      email: boden.crouch@gmail.com
+      storage: /certs/acme_athena_duckdns_letsencrypt.json
+      dnsChallenge:
+        provider: duckdns
+        resolvers: *dns-resolvers
+      httpChallenge:
+        entryPoint: web
+      tlsChallenge: {}
+      caServer: https://acme-v02.api.letsencrypt.org/directory

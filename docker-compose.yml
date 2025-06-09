@@ -1,0 +1,218 @@
+x-common-env: &common-env
+  TZ: ${TZ:-America/Chicago}
+  PUID: ${PUID:-1002}
+  PGID: ${PGID:-989}
+  UMASK: ${UMASK:-002}
+
+x-resource-limits: &resource-limits
+  labels:
+    autoheal: "true"
+
+x-common-logging: &common-logging
+  logging:
+    driver: "local"
+    options:
+      max-file: "5"
+      max-size: "10m"
+
+
+services:
+  campaign:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    image: th3w1zard1/nextjs-campaign-website:latest
+    container_name: campaign
+    hostname: campaign
+    networks:
+      - publicnet
+    environment:
+      <<: *common-env
+    volumes:
+      # Mount the entire Next.js project for live development
+      - ${SRC_PATH:-./src}:/app
+      # Preserve node_modules from the container (don't overwrite with host)
+      - /app/node_modules
+    expose:
+      - 3000
+#    ports:
+#      - "${CAMPAIGN_PORT:-8039}:3000"
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.campaign.middlewares: tinyauth@docker  # protect from public eyes and scraping with a login page.
+      traefik.http.routers.campaign.rule: Host(`campaign.${DUCKDNS_DOMAIN_ATHENA:?not set}`)
+      traefik.http.routers.campaign.service: campaign
+      traefik.http.services.campaign.loadbalancer.server.port: 3000
+    restart: always
+
+  code-campaign:
+    # 🔹🔹 Code Server 🔹🔹
+    image: linuxserver/code-server:latest
+    container_name: code-campaign
+    hostname: code-campaign
+    <<: [*common-logging, *resource-limits]
+    networks:
+      - publicnet
+#    ports:
+#      - "${CODESERVER_CAMPAIGN_PORT:-8441}:8443"
+    volumes:
+      - code-server-config:/config
+      - ${ROOT_PATH:-./}:/workspace
+    environment:
+      <<: *common-env
+      PASSWORD: ${PASSWORD:-magnificent}  # Optional
+#      HASHED_PASSWORD: ${HASHED_PASSWORD:-}  # Optional
+      SUDO_PASSWORD: ${SUDO_PASSWORD:-magnificent}  # Optional
+#      SUDO_PASSWORD_HASH: ${SUDO_PASSWORD_HASH:-}  # Optional
+      PROXY_DOMAIN: ${PROXYDOMAIN:-}  # Optional
+      DEFAULT_WORKSPACE: /workspace  # Optional
+      CODE_SERVER_PORT: ${CODE_SERVER_PORT:-8443}
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.code-campaign.middlewares: tinyauth@docker  # protect from public eyes and scraping with a login page.
+      traefik.http.routers.code-campaign.rule: Host(`code-campaign.${DUCKDNS_DOMAIN_ATHENA:?not set}`)
+      traefik.http.routers.code-campaign.service: code-campaign
+      traefik.http.services.code-campaign.loadbalancer.server.port: 8443
+    restart: always
+
+  # Multiple DNS challenge provider are not supported with Traefik,
+  # but you can use CNAME to handle that. For example, if you have example.org (account foo) and
+  # example.com (account bar) you can create a CNAME on example.org called _acme-challenge.example.org
+  # pointing to challenge.example.com. This way, you can obtain certificates for example.org with the bar account.
+  traefik:
+    # 🔹🔹 Traefik 🔹🔹
+    depends_on:
+      - tinyauth
+      - traefik-error-pages
+    image: traefik:latest
+    container_name: traefik
+    hostname: traefik
+    networks:
+      - publicnet
+    ports:
+      - 80:80  # HTTP (default)
+      - 443:443 # HTTPS (default)
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: 1
+    volumes:
+      - ${TAILSCALE_SOCK:-/var/run/tailscale/tailscaled.sock}:/var/run/tailscale/tailscaled.sock
+      - ${CERTS_PATH:-./certs}:/certs
+      - ${CONFIG_PATH:-./configs}/traefik/config:/config
+      - ${CONFIG_PATH:-./configs}/traefik/plugins-local:/plugins-local
+      - ${DOCKER_SOCK:-/var/run/docker.sock}:/var/run/docker.sock
+    environment:
+      <<: *common-env
+      CLOUDFLARE_API_KEY: ${CLOUDFLARE_API_KEY}
+      CLOUDFLARE_EMAIL: ${CLOUDFLARE_EMAIL}
+      LETS_ENCRYPT_EMAIL: ${LETS_ENCRYPT_EMAIL}
+      DUCKDNS_TOKEN: ${DUCKDNS_TOKEN}
+    command: --configFile=/config/traefik.yaml
+    labels:
+      deunhealth.restart.on.unhealthy: "true"
+      traefik.enable: "true"
+      traefik.http.routers.traefik.middlewares: tinyauth@docker  # protect from public eyes and scraping with a login page.
+      traefik.http.routers.traefik.rule: Host(`traefik.${DUCKDNS_DOMAIN_ATHENA:?not set}`)
+      traefik.http.services.traefik.loadbalancer.server.port: 8080
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080 > /dev/null 2>&1 || exit 1"]
+      interval: ${TRAEFIK_HEALTHCHECK_INTERVAL:-30s}
+      timeout: ${TRAEFIK_HEALTHCHECK_TIMEOUT:-15s}
+      retries: ${TRAEFIK_HEALTHCHECK_RETRIES:-3}
+    restart: always
+
+  traefik-error-pages:
+    # 🔹🔹 Traefik Error Pages 🔹🔹
+    # Serves static HTML error pages used by Traefik's error middleware
+    image: httpd:alpine
+    container_name: traefik-error-pages
+    hostname: error-pages
+    networks:
+      publicnet:
+        ipv4_address: ${TRAEFIK_ERROR_PAGES_IPV4_ADDRESS:-10.76.128.84}
+    volumes:
+      # Mount the directory containing error HTML files (e.g., 404.html, 5xx.html)
+      - ${CONFIG_PATH:-./configs}/traefik/error-pages:/usr/local/apache2/htdocs/:ro
+    restart: always
+
+  tinyauth:
+    image: ghcr.io/steveiliop56/tinyauth:v3
+    container_name: tinyauth
+    hostname: auth
+    networks:
+      publicnet:
+        ipv4_address: ${TINYAUTH_IPV4_ADDRESS:-10.76.128.82}
+    ports:
+      - 3000:3000
+    environment:
+      - SECRET=b9a4ZxFNBbyR9KdTAf2kSciI5jUCQLzE
+      - APP_URL=${TINYAUTH_APP_URL:-https://auth.${DUCKDNS_DOMAIN_ATHENA:?not set}}
+      - USERS=jaguiar:$$2y$$05$$MbD.3UyFZTmPACkE7TjUQeg62Z6T7Md2Z5UaqlNBsacg80BMyV/8.,brunner56:$$2y$$05$$kqVra3FeniPzpuzCQ6tpHuNgvu6EGZiINv2GjHQvtYwvQymNIn9DG
+      # TODO: setup these on google and github respectively for oauth.
+      # Google OAuth Configuration
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      # GitHub OAuth Configuration
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      #- OAUTH_WHITELIST=${TINYAUTH_OAUTH_WHITELIST:-athenajaguiar@gmail.com,boden.crouch@gmail.com}  # e.g. user1,user2,/^admin.*/
+      - OAUTH_AUTO_REDIRECT=${TINYAUTH_OAUTH_AUTO_REDIRECT:-none}  # Options: none, github, google, or generic
+      # Additional settings
+      - SESSION_EXPIRY=${TINYAUTH_SESSION_EXPIRY:-604800}  # 2 weeks session expiry
+      - COOKIE_SECURE=${TINYAUTH_COOKIE_SECURE:-true}  # Send cookie only with HTTPS
+      - APP_TITLE=${TINYAUTH_APP_TITLE:-athenaforeugene}  # Customize login page title
+      - LOGIN_MAX_RETRIES=${TINYAUTH_LOGIN_MAX_RETRIES:-15}  # Maximum login attempts before account lockout
+      - LOGIN_TIMEOUT=${TINYAUTH_LOGIN_TIMEOUT:-300}  # Lock account for 5 minutes after too many failed attempts
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.tinyauth.rule: Host(`auth.${DUCKDNS_DOMAIN_ATHENA:?not set}`)
+      traefik.http.middlewares.tinyauth.forwardauth.address: http://auth:3000/api/auth/traefik
+    volumes:
+      - ${CONFIG_PATH:-./configs}/tinyauth:/data
+    restart: unless-stopped
+
+  whoami:
+    image: traefik/whoami:latest
+    container_name: whoami
+    hostname: whoami
+    networks:
+      - publicnet
+    expose:
+      - 80
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.whoami.rule: Host(`whoami.${DUCKDNS_DOMAIN_ATHENA:?not set}`)
+      traefik.http.services.whoami.loadbalancer.server.port: 80
+      # New authenticated router
+      traefik.http.routers.whoami-auth.rule: Host(`whoami-auth.${DUCKDNS_DOMAIN_ATHENA:?not set}`)
+      traefik.http.routers.whoami-auth.middlewares: tinyauth@docker
+      traefik.http.routers.whoami-auth.service: whoami
+    restart: unless-stopped
+
+networks:
+  publicnet:
+#    external: true  # docker network create --driver=bridge --attachable publicnet --subnet=${PUBLICNET_SUBNET:-10.76.0.0/16} --gateway=${PUBLICNET_GATEWAY:-10.76.0.1} --ip-range=${PUBLICNET_IP_RANGE:-10.76.0.0/16}
+    attachable: true
+    name: publicnet
+    ipam:
+      config:
+        - subnet: ${PUBLICNET_SUBNET:-10.76.0.0/16}
+          gateway: ${PUBLICNET_GATEWAY:-10.76.0.1}
+          ip_range: ${PUBLICNET_IP_RANGE:-10.76.0.0/16}
+#  tailnet:
+#    external: true # docker network create --driver=macvlan --attachable --subnet=${TAILSCALE_SUBNET:-100.64.0.0/10} --gateway=${TAILSCALE_GATEWAY:-100.64.0.1} --ip-range=${TAILSCALE_IP_RANGE:-100.64.2.0/24} -o parent=tailscale0 tailnet
+#    name: tailnet
+#    driver: macvlan
+#    driver_opts:
+#      parent: ${TAILSCALE_INTERFACE_NAME:-tailscale0}
+#    ipam:
+#      config:
+#        - subnet: ${TAILSCALE_SUBNET:-100.64.0.0/10}
+#          gateway: ${TAILSCALE_GATEWAY:-100.64.0.1}
+#          ip_range: ${TAILSCALE_IP_RANGE:-100.64.2.0/24}
+
+volumes:
+  code-server-config:
+    driver: local
+    name: code-server-config

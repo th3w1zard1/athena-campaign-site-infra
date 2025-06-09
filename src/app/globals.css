@@ -1,0 +1,319 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+
+    /* Primary - Bright Blue (Dodger Blue) #1E90FF */
+    --primary: 210 100% 56%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary - Light Blue (Deep Sky Blue) #00BFFF */
+    --secondary: 195 100% 50%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Accent - Professional Slate */
+    --accent: 215 20% 65%;
+    --accent-foreground: 0 0% 9%;
+
+    --muted: 210 40% 98%;
+    --muted-foreground: 215 16% 47%;
+
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 210 100% 56%;
+
+    --radius: 0.5rem;
+
+    /* Campaign-specific color variables - Logo Colors */
+    --campaign-primary: 210 100% 56%;           /* Bright Blue #1E90FF */
+    --campaign-primary-light: 210 100% 90%;     /* Very Light Blue */
+    --campaign-primary-dark: 240 100% 27%;      /* Dark Blue #00008B */
+    --campaign-secondary: 195 100% 50%;         /* Light Blue #00BFFF */
+    --campaign-secondary-light: 195 100% 85%;   /* Very Light Cyan */
+    --campaign-secondary-dark: 195 100% 35%;    /* Darker Cyan */
+    --campaign-accent: 215 20% 65%;             /* Professional Slate */
+    --campaign-neutral: 210 40% 98%;            /* Light Neutral */
+    --campaign-neutral-dark: 215 16% 47%;       /* Dark Neutral */
+    
+    /* Success - Green for positive actions */
+    --campaign-success: 142 76% 36%;
+    --campaign-success-light: 142 85% 85%;
+    --campaign-success-dark: 142 70% 25%;
+    
+    /* Warning - Amber for attention */
+    --campaign-warning: 43 96% 56%;
+    --campaign-warning-light: 43 100% 85%;
+    --campaign-warning-dark: 43 90% 40%;
+
+    /* Brand colors from logo */
+    --brand-bright-blue: 210 100% 56%;    /* #1E90FF */
+    --brand-light-blue: 195 100% 50%;     /* #00BFFF */
+    --brand-dark-blue: 240 100% 27%;      /* #00008B */
+    --brand-white: 0 0% 100%;             /* #FFFFFF */
+    --brand-black: 0 0% 0%;               /* #000000 */
+  }
+
+  .dark {
+    --background: 222 84% 5%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 84% 5%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 84% 5%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Dark mode - Lighter versions for better contrast */
+    --primary: 210 100% 70%;
+    --primary-foreground: 222 84% 5%;
+
+    --secondary: 195 100% 65%;
+    --secondary-foreground: 222 84% 5%;
+
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --destructive: 0 75% 65%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 210 100% 70%;
+
+    /* Campaign-specific dark mode colors */
+    --campaign-primary: 210 100% 70%;          /* Light Blue for dark mode */
+    --campaign-primary-light: 210 100% 90%;    /* Very light Blue */
+    --campaign-primary-dark: 210 100% 56%;     /* Original Blue */
+    --campaign-secondary: 195 100% 65%;        /* Light Cyan for dark mode */
+    --campaign-secondary-light: 195 100% 85%;  /* Very light Cyan */
+    --campaign-secondary-dark: 195 100% 50%;   /* Original Cyan */
+    --campaign-accent: 217 33% 17%;            /* Dark Slate */
+    --campaign-neutral: 217 33% 17%;           /* Dark Neutral */
+    --campaign-neutral-dark: 215 20% 65%;      /* Light Neutral for text */
+    
+    /* Dark mode semantic colors */
+    --campaign-success: 142 80% 50%;
+    --campaign-success-light: 142 85% 85%;
+    --campaign-success-dark: 142 76% 36%;
+    
+    --campaign-warning: 43 96% 65%;
+    --campaign-warning-light: 43 100% 90%;
+    --campaign-warning-dark: 43 96% 56%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Modern Button System with Logo Colors */
+  .btn-primary {
+    @apply inline-flex items-center px-6 py-3 text-sm font-semibold rounded-lg text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200 shadow-md hover:shadow-lg dark:bg-primary-500 dark:hover:bg-primary-600;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center px-6 py-3 text-sm font-semibold rounded-lg text-white bg-secondary-500 hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-500 transition-all duration-200 shadow-md hover:shadow-lg dark:bg-secondary-500 dark:hover:bg-secondary-600;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center px-6 py-3 border-2 border-primary-500 text-sm font-semibold rounded-lg text-primary-500 bg-white hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200 shadow-sm hover:shadow-md dark:border-primary-400 dark:text-primary-400 dark:bg-neutral-900 dark:hover:bg-primary-950;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center px-6 py-3 text-sm font-semibold rounded-lg text-primary-600 bg-transparent hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200 dark:text-primary-400 dark:hover:bg-primary-950;
+  }
+
+  /* Typography System */
+  .section-title {
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold text-neutral-900 dark:text-neutral-100 mb-6 font-display leading-tight;
+  }
+
+  .section-subtitle {
+    @apply text-xl md:text-2xl text-neutral-600 dark:text-neutral-300 max-w-4xl mx-auto mb-8 leading-relaxed;
+  }
+
+  .prose-campaign {
+    @apply prose prose-lg prose-neutral dark:prose-invert max-w-none prose-headings:font-display prose-headings:text-neutral-900 dark:prose-headings:text-neutral-100 prose-a:text-primary-600 dark:prose-a:text-primary-400 prose-a:no-underline hover:prose-a:underline;
+  }
+
+  /* Card System */
+  .card {
+    @apply bg-card text-card-foreground rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300 border border-border;
+    backdrop-filter: blur(4px);
+  }
+
+  .card-elevated {
+    @apply bg-card text-card-foreground rounded-xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border border-border;
+    backdrop-filter: blur(4px);
+  }
+
+  .card-feature {
+    @apply text-card-foreground rounded-xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border border-border hover:scale-105;
+    background: linear-gradient(to bottom right, hsl(var(--card)), hsl(var(--card) / 0.8));
+    backdrop-filter: blur(4px);
+  }
+
+  /* Campaign-specific component classes */
+  .hero-section {
+    @apply relative overflow-hidden pt-20 pb-32 text-white;
+    background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 50%, #00008B 100%);
+  }
+
+  .hero-section::before {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(to right, rgba(30, 144, 255, 0.1), transparent);
+  }
+
+  .page-header {
+    @apply py-20 md:py-28 text-white relative overflow-hidden;
+    background: linear-gradient(135deg, #1E90FF 0%, #00008B 100%);
+  }
+
+  .page-header::before {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.1));
+  }
+
+  .content-section {
+    @apply py-20 bg-background;
+  }
+
+  .content-section-alt {
+    @apply py-20 bg-neutral-50 dark:bg-neutral-900;
+  }
+
+  .dark .content-section-alt {
+    @apply bg-neutral-900;
+  }
+
+  .content-section-primary {
+    @apply py-20 text-white;
+    background: linear-gradient(135deg, #1E90FF 0%, #00BFFF 100%);
+  }
+
+  .dark .content-section-primary {
+    background: linear-gradient(135deg, #1E90FF 0%, #00008B 100%);
+  }
+
+  .issue-card {
+    @apply bg-white dark:bg-neutral-800 rounded-xl shadow-md p-6 hover:shadow-lg transition-all duration-300 border border-neutral-200 dark:border-neutral-700;
+  }
+
+  .platform-card {
+    @apply bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-8 border border-neutral-200 dark:border-neutral-700 hover:shadow-xl transition-all duration-300;
+  }
+
+  /* Campaign Brand Color Utilities */
+  .text-primary-campaign {
+    color: #1E90FF;
+  }
+
+  .text-secondary-campaign {
+    color: #00BFFF;
+  }
+
+  .bg-primary-campaign {
+    background-color: #1E90FF;
+  }
+
+  .bg-secondary-campaign {
+    background-color: #00BFFF;
+  }
+
+  .hover-primary-campaign {
+    @apply hover:bg-primary-500 hover:text-white transition-colors duration-200;
+  }
+
+  .hover-secondary-campaign {
+    @apply hover:bg-secondary-500 hover:text-white transition-colors duration-200;
+  }
+
+  /* Interactive Elements */
+  .interactive-card {
+    @apply transform hover:scale-105 transition-all duration-300 cursor-pointer;
+  }
+
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500;
+  }
+
+  /* Alert Components */
+  .alert-success {
+    @apply bg-success-50 border border-success-200 text-success-800 rounded-lg p-4 dark:bg-success-900/20 dark:border-success-800 dark:text-success-300;
+  }
+
+  .alert-warning {
+    @apply bg-warning-50 border border-warning-200 text-warning-800 rounded-lg p-4 dark:bg-warning-900/20 dark:border-warning-800 dark:text-warning-300;
+  }
+
+  /* Animation Classes */
+  .animate-fade-in {
+    @apply animate-fade-in;
+  }
+
+  .animate-slide-up {
+    @apply transform translate-y-4 opacity-0 transition-all duration-500 ease-out;
+  }
+
+  .animate-scale-in {
+    @apply transform scale-95 opacity-0 transition-all duration-300 ease-out;
+  }
+}
+
+/* Custom animations for donation popup */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.4s ease-out;
+}

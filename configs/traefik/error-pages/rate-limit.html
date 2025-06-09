@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate Limit Exceeded - Media Stack</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 650px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #e53935;
+            margin-top: 0;
+        }
+        .subtitle {
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .warning-box {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #1976d2;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #1565c0;
+        }
+        .button.secondary {
+            background-color: #757575;
+        }
+        .button.secondary:hover {
+            background-color: #616161;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #757575;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rate Limit Exceeded</h1>
+        <p class="subtitle">We've detected unusually high traffic from your IP address.</p>
+        
+        <p>Our services are designed to handle a reasonable amount of requests to ensure fair usage for all users. Your current access pattern has triggered our rate limiting system.</p>
+        
+        <div class="info-box">
+            <h3>Want unrestricted access?</h3>
+            <p>Create a free account or sign in to enjoy higher rate limits and a better experience.</p>
+        </div>
+        
+        <div class="warning-box">
+            <h3>Why am I seeing this?</h3>
+            <p>This can happen if:</p>
+            <ul>
+                <li>You're making too many requests in a short period</li>
+                <li>Multiple users are accessing from the same IP address</li>
+                <li>You're using automated tools or scripts</li>
+            </ul>
+        </div>
+        
+        <div class="button-container">
+            <a href="/auth/realms/MediaStack/protocol/openid-connect/auth" class="button">Sign In</a>
+            <a href="/auth/realms/MediaStack/protocol/openid-connect/registrations" class="button">Create Account</a>
+            <a href="javascript:history.back()" class="button secondary">Go Back</a>
+        </div>
+        
+        <div class="footer">
+            <p>Media Stack Services | Self-hosted Media Platform</p>
+        </div>
+    </div>
+</body>
+</html> 

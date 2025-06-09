@@ -1,0 +1,22 @@
+# Enable the rewrite engine
+RewriteEngine On
+
+# If the requested file doesn't exist
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# Redirect to default.html
+RewriteRule ^(\d+)\.html$ /default.html [L]
+
+# Set proper content type for HTML files
+<FilesMatch "\.html$">
+    ForceType text/html
+    Header set Content-Type "text/html; charset=UTF-8"
+</FilesMatch>
+
+# Allow .htaccess to be processed
+<Files .htaccess>
+    Require all denied
+</Files>
+
+# Force errors to redirect to default.html
+ErrorDocument 404 /default.html 

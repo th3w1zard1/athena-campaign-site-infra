@@ -1,0 +1,126 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3-file-provider.json
+
+http:
+  routers:
+    # Catch-all router with lowest priority for unmatched hosts
+    catchall-404:
+      rule: "Host(`*`)"
+      entryPoints:
+        - websecure
+      # Use the lowest priority
+      priority: 1
+      # Use the error pages middleware defined below
+      middlewares:
+        - error-pages@file
+      # The service here doesn't strictly matter as the middleware intercepts,
+      # but Traefik requires one. We can point it to the error-pages service itself
+      # or use the built-in noop service if preferred.
+      service: noop@internal
+      tls: {}
+  services:
+    error-pages:
+      loadBalancer:
+        servers:
+          - url: "http://error-pages:80"
+    stremio:
+      loadBalancer:
+        servers:
+          - url: "http://stremio:8080"
+    stremio-http-server:
+      loadBalancer:
+        servers:
+          - url: "http://stremio:11470"
+    stremio-https-server:
+      loadBalancer:
+        servers:
+          - url: "http://stremio:12470"
+  middlewares:
+    ipallowlist-private:
+      ipAllowList:
+        sourceRange:
+          - "127.0.0.1/32"     # localhost (ipv4)
+          - "::1/128"          # localhost (ipv6)
+          - "172.17.0.0/12"    # docker network
+          - "10.76.0.0/16"     # docker 'publicnet' network
+          - "100.64.0.0/10"    # tailscale network
+#          - "149.130.221.93"   # micklethefickle oracle cloud vps
+#          - "207.211.189.95"   # beatapostapita oracle cloud vps
+#          - "152.117.108.32"   # wizard-pc
+    api-key-auth:
+      headers:
+        customRequestHeaders:
+          X-API-Key: "sk_IQys9kpENSiYY8lFuCslok3PauKBRSzeGprmvPfiMWAM9neeXoSqCZW7pMlWKbqPrwtF33kh1F73vf7D4PBpVfZJ1reHEL8d6ny6J03Ho"
+    compress:
+      compress: {}     # Use default compression settings
+    error-pages:
+      errors:
+        status:
+          - "400-599"
+        service: error-pages
+        query: "/{status}.html"
+    error-pages-ratelimit:
+      errors:
+        status:
+          - "429"
+        service: error-pages
+        query: "/rate-limit-explanation.html"
+    rate-limit-unauthenticated:
+      rateLimit:
+        average: 30    # 30 requests per period
+        period: 1m     # per minute
+        burst: 20      # allow 20 requests burst
+        sourceCriterion:
+          ipStrategy:
+            depth: 1   # Use the first IP in X-Forwarded-For
+    rate-limit-unauthenticated-with-redirect:
+      chain:
+        middlewares:
+          - rate-limit-unauthenticated
+          - rate-limit-error-page
+    rate-limit-authenticated:
+      rateLimit:
+        average: 100   # 100 requests per period
+        period: 1m     # per minute
+        burst: 50      # allow 50 requests burst
+        sourceCriterion:
+          ipStrategy:
+            depth: 1   # Use the first IP in X-Forwarded-For
+    rate-limit-api:
+      rateLimit:
+        average: 300   # 300 requests per period
+        period: 1m     # per minute
+        burst: 100     # allow 100 requests burst
+        sourceCriterion:
+          ipStrategy:
+            depth: 1   # Use the first IP in X-Forwarded-For
+    rate-limit-error-page:
+      errors:
+        status:
+          - "429"
+        service: error-pages
+        query: "/rate-limit-explanation.html"
+    return-code-override-ratelimit:
+      plugin:
+        return-code-override:
+          codes:
+            429: 200
+    headers-add-cors-for-stremio:
+      headers:
+        accessControlAllowOriginList:
+          - "*"
+        accessControlAllowMethods:
+          - "GET"
+          - "OPTIONS"
+          - "PUT"
+          - "POST"
+          - "DELETE"
+        accessControlAllowHeaders:
+          - "*"
+        accessControlMaxAge: 100
+        addVaryHeader: true
+        customRequestHeaders:
+          X-Forwarded-For: "#{clientIP}"
+          X-Real-IP: "#{clientIP}"
+          X-Forwarded-Proto: "#{request.scheme}"
+          X-Forwarded-Scheme: "#{request.scheme}"
+          Host: "#{request.host}"

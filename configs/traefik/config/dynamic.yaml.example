@@ -1,0 +1,1032 @@
+http:
+  middlewares:
+    ########################################################
+    # Dynamic Path Stripper Middleware
+    ########################################################
+    dynamic-path-stripper:
+      stripPrefixRegex:
+        regex: "^/([a-zA-Z0-9_-]+)(/.*)?$"
+
+    ########################################################
+    # AddPrefix Middleware
+    ########################################################
+    # Updates the URL path by adding a prefix before forwarding the request
+    #
+    # Key features:
+    # - Modifies request URL path by prepending a prefix
+    # - Maintains the rest of the URL path after the prefix
+    # - Useful for path-based routing and service mapping
+    # - Can help adapt mismatched path structures between services
+    #
+    # Configuration options:
+    # - prefix: String to prepend to the URL path
+    #   Must include leading slash (e.g. "/foo")
+    #   Original path is preserved after the prefix
+    #
+    # Example transformations:
+    # - /bar -> /foo/bar
+    # - /api/users -> /foo/api/users
+    # - / -> /foo/
+    #
+    # Important notes:
+    # - Prefix must start with forward slash
+    # - Does not modify query parameters or URL fragments
+    # - Original path is kept intact after the prefix
+    # - Multiple prefixes can be chained if needed
+    add-foo:
+      addPrefix:
+        prefix: "/foo"
+    ########################################################
+    # BasicAuth Middleware
+    ########################################################
+    # Implements HTTP Basic Authentication to restrict access to services
+    # Only allows access to configured users with valid credentials
+    #
+    # Key features:
+    # - Restricts access using username/password authentication
+    # - Supports hashed passwords (MD5, SHA1, BCrypt)
+    # - Can load users from file or inline configuration
+    # - Customizable realm and header options
+    # - Can remove auth headers before forwarding
+    #
+    # Configuration options:
+    # - users: List of authorized users in format "username:hashed-password"
+    #   Passwords must be hashed using MD5, SHA1, or BCrypt
+    # - usersFile: Path to file containing authorized users
+    #   File format is one user:hash per line
+    # - realm: Custom realm name shown in auth prompt (default: traefik)
+    # - headerField: Header to store authenticated username
+    # - removeHeader: Whether to strip auth header before forwarding
+    #
+    # Important notes:
+    # - Use htpasswd to generate password hashes
+    # - Users from file take precedence over inline users
+    # - Kubernetes should use secrets instead of usersFile
+    # - Dollar signs in hashes must be escaped in Docker labels
+    #
+    # Example usage:
+    # Basic auth with inline users
+    basic-auth:
+      basicAuth:
+        users:
+          - "admin:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/"
+          - "user:$apr1$d9hr9HBB$4HxwgUir3HP4EsggP/QNo0"
+
+    # Auth with custom realm and header
+    custom-auth:
+      basicAuth:
+        users:
+          - "admin:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/"
+        realm: "Restricted Area"
+        headerField: "X-Authenticated-User"
+
+    # Auth from user file with header removal
+    file-auth:
+      basicAuth:
+        usersFile: "/path/to/users"
+        removeHeader: true
+
+    # Complete configuration
+    full-auth:
+      basicAuth:
+        users:
+          - "admin:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/"
+        usersFile: "/path/to/users"
+        realm: "Secure Zone"
+        headerField: "X-Auth-User"
+        removeHeader: true
+    ########################################################
+    # Buffering Middleware
+    ########################################################
+    # Controls how requests are read and buffered before forwarding to services
+    # Helps handle large requests and responses efficiently and safely
+    #
+    # Key features:
+    # - Reads entire request into memory/disk before forwarding
+    # - Rejects requests exceeding configured limits
+    # - Can buffer large responses from services
+    # - Supports request retries on errors
+    # - Helps services handle large data (e.g. multipart/form-data)
+    #
+    # Configuration options:
+    # - maxRequestBodyBytes: Maximum allowed request body size in bytes
+    #   Requests exceeding this return 413 (Request Entity Too Large)
+    # - memRequestBodyBytes: Threshold in bytes above which request is buffered to disk
+    #   Instead of memory for large requests
+    # - maxResponseBodyBytes: Maximum allowed response size from service in bytes
+    #   Responses exceeding this return 413 to client
+    # - memResponseBodyBytes: Threshold in bytes above which response is buffered to disk
+    #   Instead of memory for large responses
+    # - retryExpression: Logic for retrying failed requests
+    #   Uses functions: Attempts(), ResponseCode(), IsNetworkError()
+    #
+    # Important notes:
+    # - All size limits are in bytes
+    # - Disk buffering helps handle large payloads efficiently
+    # - Retry logic can help handle transient failures
+    # - 413 responses protect against oversized payloads
+    #
+    # Example usage:
+    # Basic request size limit
+    request-limit:
+      buffering:
+        maxRequestBodyBytes: 2000000
+    # Memory/disk buffering thresholds
+    large-files:
+      buffering:
+        maxRequestBodyBytes: 20000000
+        memRequestBodyBytes: 1000000
+        maxResponseBodyBytes: 20000000
+        memResponseBodyBytes: 1000000
+    # With retry logic
+    retry-buffer:
+      buffering:
+        maxRequestBodyBytes: 2000000
+        retryExpression: "IsNetworkError() && Attempts() < 3"
+    # Complete configuration
+    full-buffer:
+      buffering:
+        maxRequestBodyBytes: 10000000
+        memRequestBodyBytes: 1000000
+        maxResponseBodyBytes: 10000000
+        memResponseBodyBytes: 1000000
+        retryExpression: "IsNetworkError() && Attempts() < 2 || ResponseCode() == 500"
+    ########################################################
+    # Chain Middleware
+    ########################################################
+    # Enables defining reusable combinations of multiple middlewares into a single chain
+    # Makes it easier to apply consistent middleware groups across multiple routers
+    #
+    # Configuration options:
+    # - middlewares: List of middleware names to be chained together
+    #   Order matters - middlewares are applied in the order listed
+    #
+    # Important notes:
+    # - Each middleware in the chain must be defined separately
+    # - Middleware chains can include any valid middleware type
+    # - Chains can be nested (a chain can include other chains)
+    # - Circular references will cause errors
+    # - All middlewares in chain must be valid for the chain to work
+    #
+    # Common use cases:
+    # - Combining security middlewares (auth, IP filtering, HTTPS)
+    # - Standardizing request/response processing
+    # - Creating reusable security policies
+    #
+    # Example usage:
+    # Basic security chain combining HTTPS redirect, IP whitelist and authentication
+    secured2:
+      chain:
+        middlewares:
+          - https-only # Forces HTTPS
+          - known-ips # IP whitelist
+          - auth-users # Basic authentication
+
+    # Chain for API endpoints
+    api-security:
+      chain:
+        middlewares:
+          - rate-limit
+          - jwt-auth
+          - api-headers
+
+    # Chain for public endpoints
+    public-access:
+      chain:
+        middlewares:
+          - compression
+          - caching
+          - headers
+    ########################################################
+    # CircuitBreaker Middleware
+    ########################################################
+    # Protects system from cascading failures by monitoring service health
+    # and stopping requests to unhealthy services
+    #
+    # Circuit breaker states:
+    # - Closed: Normal operations, collecting metrics
+    # - Open: Service unhealthy, fallback mechanism active
+    # - Recovering: Gradually resuming normal operations
+    #
+    # Configuration options:
+    # - expression: Condition that triggers circuit breaker
+    #   Supports these metrics:
+    #   - NetworkErrorRatio(): Network error percentage
+    #   - ResponseCodeRatio(from,to,divFrom,divTo): Status code ratio
+    #   - LatencyAtQuantileMS(n.0): Response time at percentile
+    #
+    # Important notes:
+    # - Each router gets its own circuit breaker instance
+    # - CheckPeriod: 100ms (not configurable)
+    # - FallbackDuration: 10s (not configurable)
+    # - RecoveryDuration: 10s (not configurable)
+    # - Fallback returns 503 Service Unavailable
+    #
+    # Example usage:
+    # Network error threshold
+    network-errors:
+      circuitBreaker:
+        expression: "NetworkErrorRatio() > 0.30"
+
+    # Status code ratio threshold
+    error-rates:
+      circuitBreaker:
+        expression: "ResponseCodeRatio(500, 600, 0, 600) > 0.25"
+
+    # Latency threshold
+    latency-threshold:
+      circuitBreaker:
+        expression: "LatencyAtQuantileMS(50.0) > 100"
+
+    # Combined metrics with operators
+    combined-check:
+      circuitBreaker:
+        expression: "ResponseCodeRatio(500, 600, 0, 600) > 0.30 || NetworkErrorRatio() > 0.10"
+
+    ########################################################
+    # Compress Middleware
+    ########################################################
+    # Compresses the response before sending it to the client using gzip compression
+    #
+    # By default, responses are compressed when:
+    # - Response body is larger than 1400 bytes
+    # - Accept-Encoding request header contains gzip
+    # - Response is not already compressed (no Content-Encoding header)
+    # - If Content-Type is undefined, compression middleware will auto-detect it
+    #
+    # Configuration options:
+    # - excludedContentTypes: List of content types to exclude from compression
+    #   Content types are compared case-insensitive with whitespace ignored
+    #
+    # Important notes:
+    # - Compression helps reduce bandwidth usage and improve load times
+    # - Only compresses responses meeting the above criteria
+    # - Can exclude specific content types from compression
+    # - Will set Content-Type header if auto-detected
+    #
+    # Example usage:
+    # Basic compression with no exclusions
+    basic-compress:
+      compress: {}
+
+    # Compression with excluded content types
+    selective-compress:
+      compress:
+        excludedContentTypes:
+          - text/event-stream
+          - image/jpeg
+          - video/mp4
+
+    ########################################################
+    # ContentType Middleware
+    ########################################################
+    # Controls automatic Content-Type header detection behavior
+    #
+    # By default, Traefik will auto-detect and set the Content-Type header
+    # if not set by the backend. This middleware allows changing this behavior.
+    #
+    # Configuration options:
+    # - autoDetect: Controls Content-Type auto-detection (default: false)
+    #   - true: Enables automatic Content-Type detection based on response content
+    #   - false: Disables auto-detection, preserves backend header as-is
+    #
+    # Important notes:
+    # - Without this middleware, Traefik's default is to auto-detect Content-Type
+    # - Adding this middleware with autoDetect: false disables auto-detection
+    # - Only affects core Traefik MIME detection, not other middleware modifications
+    # - Recommended to disable auto-detection (false) for proper proxy behavior
+    #
+    # Example usage:
+    # Disable Content-Type auto-detection (recommended proxy behavior)
+    autodetect:
+      contentType:
+        autoDetect: false
+
+    ########################################################
+    # DigestAuth Middleware Examples
+    ########################################################
+    # Adds digest authentication to restrict access to services
+    # Only allows access to configured users with valid credentials
+    #
+    # Configuration options:
+    # - users: List of authorized users in format name:realm:encoded-password
+    #         Generate passwords using htdigest utility
+    # - usersFile: Path to external file containing authorized users
+    #            File contains list of name:realm:encoded-password
+    #            Takes precedence over users list if both specified
+    # - realm: Custom realm name for authentication (default: traefik)
+    # - headerField: Custom header field for authenticated user
+    # - removeHeader: Remove auth header before forwarding (default: false)
+
+    # Basic digest auth example with user list
+    test-digest-auth:
+      digestAuth:
+        users:
+          - "test:traefik:a2688e031edb4be6a3797f3882655c05"
+          - "test2:traefik:518845800f9e2bfb1f1f740ec24f074e"
+
+    # Example with custom realm
+    test-realm-digest-auth:
+      digestAuth:
+        realm: "MyRealm"
+        users:
+          - "test:MyRealm:a2688e031edb4be6a3797f3882655c05"
+
+    # Example with external users file
+    test-file-digest-auth:
+      digestAuth:
+        usersFile: "/path/to/my/usersfile"
+
+    # Example with custom header field
+    test-header-digest-auth:
+      digestAuth:
+        headerField: "X-WebAuth-User"
+        users:
+          - "test:traefik:a2688e031edb4be6a3797f3882655c05"
+
+    # Example with header removal
+    test-remove-digest-auth:
+      digestAuth:
+        removeHeader: true
+        users:
+          - "test:traefik:a2688e031edb4be6a3797f3882655c05"
+
+    ########################################################
+    # ErrorPage Middleware Examples
+    ########################################################
+    # Custom error pages for specified HTTP status codes
+    # The error page must be hosted by an external service (not Traefik)
+    #
+    # Configuration options:
+    # - status: Status code ranges that trigger the error page (inclusive)
+    #          Can be single codes (500) or ranges (500-599)
+    # - service: External service that hosts the error pages
+    #          For Kubernetes, reference a Kubernetes service
+    # - query: URL path for the error page, can use {status} placeholder
+    #         {status} will be replaced with actual HTTP status code
+    test-errorpage:
+      errors:
+        # Return custom error page for all 5XX server errors
+        status:
+          - "500-599"
+        # Service that hosts the error pages
+        service: serviceError
+        # URL pattern for error pages
+        # Will request /{actual-status-code}.html from serviceError
+        query: "/{status}.html"
+    ########################################################
+    # ForwardAuth Middleware Examples
+    ########################################################
+    # Delegates authentication to an external service
+    # Returns 2XX = access granted, otherwise denied
+    # Basic forward auth example
+    # Simply forwards auth requests to example.com
+    test-basic-forward-auth:
+      forwardAuth:
+        address: "https://example.com/auth"
+    # Address configuration example
+    # Defines the authentication server address
+    test-address-auth:
+      forwardAuth:
+        address: "https://example.com/auth"
+    # Trust Forward Header example
+    # Trusts existing X-Forwarded-* headers when true
+    test-trustForwardHeader-auth:
+      forwardAuth:
+        address: "https://example.com/auth"
+        trustForwardHeader: true
+    # Auth Response Headers example
+    # Copies specified headers from auth server to request
+    test-authResponseHeaders-auth:
+      forwardAuth:
+        address: "https://example.com/auth"
+        authResponseHeaders:
+          - "X-Auth-User"
+          - "X-Secret"
+    # TLS CA configuration example
+    # Uses specified CA for secured connection to auth server
+    test-tls-auth:
+      forwardAuth:
+        address: "https://example.com/auth"
+        tls:
+          ca: "path/to/local.crt"
+    # TLS CA Optional example
+    # Controls client cert verification policy
+    # true = VerifyClientCertIfGiven
+    # false = RequireAndVerifyClientCert
+    test-tls.caOptional-auth:
+      forwardAuth:
+        address: "https://example.com/auth"
+        tls:
+          caOptional: true
+    # TLS Certificate example
+    # Specifies public cert for secured auth connection
+    test-tls.cert-auth:
+      forwardAuth:
+        address: "https://example.com/auth"
+        tls:
+          cert: "path/to/foo.cert"
+          key: "path/to/foo.key"
+    # TLS Key example
+    # Specifies private key for secured auth connection
+    test-tls.key-auth:
+      forwardAuth:
+        address: "https://example.com/auth"
+        tls:
+          cert: "path/to/foo.cert"
+          key: "path/to/foo.key"
+    # TLS Insecure Skip Verify example
+    # When true, accepts any cert/hostname from auth server
+    test-insecureSkipVerify-auth:
+      forwardAuth:
+        address: "https://example.com/auth"
+        tls:
+          insecureSkipVerify: true
+    ########################################################
+    # Headers Middleware: Managing Request/Response Headers
+    ########################################################
+    # Purpose: Manage and modify HTTP headers for requests and responses
+    #
+    # Key Features:
+    # - Add/remove custom headers
+    # - Configure security headers
+    # - Set CORS policies
+    # - Control browser behavior
+    #
+    # Configuration Options:
+    # 1. Custom Headers
+    #    - Add or modify headers in requests/responses
+    #    - Remove headers by setting empty value
+    #    - Useful for proxy configurations and custom metadata
+    #
+    # 2. Security Headers
+    #    - Frame options for clickjacking protection
+    #    - SSL/TLS enforcement
+    #    - Content security policies
+    #    - XSS protection
+    #
+    # 3. CORS (Cross-Origin Resource Sharing)
+    #    - Control cross-origin requests
+    #    - Set allowed origins, methods, headers
+    #    - Configure preflight caching
+    #    - Manage credentials and exposed headers
+    #
+    # Use Cases:
+    # - Add proxy-specific headers
+    # - Implement security policies
+    # - Enable cross-origin resource sharing
+    # - Control browser security features
+    #
+    # Best Practices:
+    # - Use security headers appropriately
+    # - Configure CORS carefully
+    # - Test header modifications thoroughly
+
+    # Example 1: Adding Custom Request/Response Headers
+    testHeader:
+      headers:
+        customRequestHeaders:
+          X-Script-Name: "test"
+        customResponseHeaders:
+          X-Custom-Response-Header: "value"
+
+    # Example 2: Adding and Removing Headers
+    testHeader2:
+      headers:
+        customRequestHeaders:
+          X-Script-Name: "test" # Adds
+          X-Custom-Request-Header: "" # Removes
+        customResponseHeaders:
+          X-Custom-Response-Header: "" # Removes
+
+    # Example 3: Security Headers Configuration
+    testHeader3:
+      headers:
+        frameDeny: true
+        sslRedirect: true
+
+    # Example 4: CORS Headers Configuration
+    testHeader4:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - OPTIONS
+          - PUT
+        accessControlAllowOriginList:
+          - https://foo.bar.org
+          - https://example.org
+        accessControlMaxAge: 100
+        addVaryHeader: true
+
+    ########################################################
+    # IPWhiteList Middleware: Limiting Clients to Specific IPs
+    ########################################################
+    # Purpose: Accept/refuse requests based on client IP addresses
+    #
+    # Key Features:
+    # - IP-based access control
+    # - Support for CIDR notation
+    # - Flexible client IP determination strategies
+    # - X-Forwarded-For header processing
+    #
+    # Configuration Options:
+    # 1. sourceRange: Define allowed IP addresses/ranges
+    #    - Uses CIDR notation for IP ranges
+    #    - Can specify individual IPs
+    #    - Example: Allow local and specific IPs
+    #
+    # 2. ipStrategy: Configure how client IP is determined
+    #    a. depth: Process X-Forwarded-For header
+    #       - Counts from right to determine IP position
+    #       - Example: depth=2 with "10.0.0.1,11.0.0.1,12.0.0.1,13.0.0.1"
+    #         uses "12.0.0.1" as client IP
+    #       - Ignored if ≤ 0
+    #       - Empty if depth > total IPs
+    #
+    #    b. excludedIPs: Skip specific IPs in X-Forwarded-For
+    #       - Finds first IP not in excluded list
+    #       - Ignored if depth is specified
+    #       - Examples:
+    #         * "10.0.0.1,11.0.0.1,12.0.0.1" with excluded "12.0.0.1"
+    #           uses "11.0.0.1" as client IP
+    #         * All IPs excluded results in empty client IP
+    #
+    # Use Cases:
+    # - Restrict access to internal services
+    # - Implement IP-based security policies
+    # - Handle requests behind proxies correctly
+    #
+    # Best Practices:
+    # - Use CIDR notation for IP ranges
+    # - Consider proxy infrastructure when using ipStrategy
+    # - Test configuration with expected X-Forwarded-For scenarios
+    test-ipwhitelist:
+      ipWhiteList:
+        sourceRange:
+          - "127.0.0.1/32"
+          - "192.168.1.7"
+
+    test-ipwhitelist2:
+      ipWhiteList:
+        ipStrategy:
+          excludedIPs:
+            - "127.0.0.1/32"
+            - "192.168.1.7"
+
+    ########################################################
+    # InFlightReq Middleware: Limiting Simultaneous Requests
+    ########################################################
+    # Purpose: Limit the number of simultaneous in-flight requests to prevent service overload
+    #
+    # Key Features:
+    # - Controls concurrent request volume
+    # - Prevents service saturation
+    # - Configurable request limits and source criteria
+    # - Returns HTTP 429 when limit exceeded
+    #
+    # Configuration Options:
+    # 1. amount: Maximum number of concurrent requests allowed
+    #    - Required parameter
+    #    - Returns 429 Too Many Requests when exceeded
+    #    - Example: Limit to 10 simultaneous requests
+    #
+    # 2. sourceCriterion: Define how to group request sources
+    #    a. ipStrategy: Group by client IP
+    #       - depth: Use X-Forwarded-For header position
+    #       - excludedIPs: Skip specific IPs when determining source
+    #    b. requestHeaderName: Group by request header value
+    #    c. requestHost: Group by request host
+    #    - Default: Uses requestHost if none specified
+    #
+    # Use Cases:
+    # - Protect services from concurrent request overload
+    # - Implement fair resource allocation
+    # - Control traffic based on client identity
+    #
+    # Best Practices:
+    # - Set appropriate limits based on service capacity
+    # - Consider source grouping strategy carefully
+    # - Monitor 429 responses to adjust limits
+    test-inflightreq:
+      inFlightReq:
+        amount: 10
+
+    test-inflightreq2:
+      inFlightReq:
+        amount: 10
+
+    test-inflightreq3:
+      inFlightReq:
+        sourceCriterion:
+          ipStrategy:
+            depth: 2
+
+    test-inflightreq4:
+      inFlightReq:
+        sourceCriterion:
+          ipStrategy:
+            excludedIPs:
+              - "127.0.0.1/32"
+              - "192.168.1.7"
+
+    test-inflightreq5:
+      inFlightReq:
+        sourceCriterion:
+          requestHeaderName: username
+
+    test-inflightreq6:
+      inFlightReq:
+        sourceCriterion:
+          requestHost: true
+    ########################################################
+    # PassTLSClientCert Middleware: Adding Client Certificates in a Header
+    ########################################################
+    # Purpose: Adds in header the selected data from the passed client tls certificate.
+    # https://doc.traefik.io/traefik/v2.2/middlewares/passtlsclientcert/
+    #
+    # Key Features:
+    # - Adds client certificate information to request headers.
+    # - Can pass the escaped PEM or specific certificate details.
+    # - Useful for:
+    #   * Authentication based on client certificates.
+    #   * Accessing client certificate information in backend services.
+    #
+    # Configuration Examples:
+    # Pass the escaped pem in the X-Forwarded-Tls-Client-Cert header.
+    #
+    # Configuration Options:
+    # General:
+    #   PassTLSClientCert can add two headers to the request:
+    #     - X-Forwarded-Tls-Client-Cert: contains the escaped pem.
+    #     - X-Forwarded-Tls-Client-Cert-Info: contains all the selected certificate information in an escaped string.
+    # Info:
+    #   The headers are filled with escaped string so it can be safely placed inside a URL query.
+    #   These options only work accordingly to the MutualTLS configuration.
+    #   That is to say, only the certificates that match the clientAuth.clientAuthType policy are passed.
+    #
+    # pem:
+    #   Sets the X-Forwarded-Tls-Client-Cert header with the escaped certificate.
+    #   The data used by the pem option is the part between -----BEGIN CERTIFICATE----- and -----END CERTIFICATE----- delimiters.
+    #   The delimiters and \n will be removed.
+    #   If there are more than one certificate, they are separated by a ",".
+    #   X-Forwarded-Tls-Client-Cert value could exceed the web server header size limit.
+    #   The header size limit of web servers is commonly between 4kb and 8kb.
+    #   You could change the server configuration to allow bigger header or use the info option with the needed field(s).
+    #
+    # info:
+    #   Select the specific client certificate details you want to add to the X-Forwarded-Tls-Client-Cert-Info header.
+    #   The value of the header will be an escaped concatenation of all the selected certificate details.
+    #   If there are more than one certificate, they are separated by a ,.
+    #   - notAfter: Add the Not After information from the Validity part (NA="1607166616").
+    #   - notBefore: Add the Not Before information from the Validity part (NB="1544094616").
+    #   - sans: Add the Subject Alternative Name information from the Subject Alternative Name part (SAN="*.example.org,*.example.net,*.example.com,test@example.org,test@example.net,10.0.1.0,10.0.1.2").
+    #   - subject: Select the specific client certificate subject details you want to add to the X-Forwarded-Tls-Client-Cert-Info header.
+    #     - country: Add the country information into the subject (C=FR,C=US).
+    #     - province: Add the province information into the subject (ST=Cheese org state,ST=Cheese com state).
+    #     - locality: Add the locality information into the subject (L=TOULOUSE,L=LYON).
+    #     - organization: Add the organization information into the subject (O=Cheese,O=Cheese 2).
+    #     - commonName: Add the commonName information into the subject (CN=*.example.com).
+    #     - serialNumber: Add the serialNumber information into the subject (SN=1234567890).
+    #     - domainComponent: Add the domainComponent information into the subject (DC=org,DC=cheese).
+    #   - issuer: Select the specific client certificate issuer details you want to add to the X-Forwarded-Tls-Client-Cert-Info header.
+    #     - country: Add the country information into the issuer (C=FR,C=US).
+    #     - province: Add the province information into the issuer (ST=Signing State,ST=Signing State 2).
+    #     - locality: Add the locality information into the issuer (L=TOULOUSE,L=LYON).
+    #     - organization: Add the organization information into the issuer (O=Cheese,O=Cheese 2).
+    #     - commonName: Add the commonName information into the issuer (CN=Simple Signing CA 2).
+    #     - serialNumber: Add the serialNumber information into the issuer (SN=1234567890).
+    #     - domainComponent: Add the domainComponent information into the issuer (DC=org,DC=cheese).
+    test-passtlsclientcert: # https://doc.traefik.io/traefik/v2.2/middlewares/passtlsclientcert/
+      passTLSClientCert:
+        pem: true
+
+    ########################################################
+    # RateLimit Middleware: Request Rate Control
+    ########################################################
+    # Purpose: Control the number of requests going to a service
+    #
+    # Key Features:
+    # - Limit requests per second from a source
+    # - Prevent service overload
+    # - Configurable average and burst rates
+    #
+    # Configuration Options:
+    # 1. average: Maximum rate of requests per second
+    #    - Defaults to 0 (no rate limiting)
+    #    - Actual rate = average / period
+    #    - Example: 100 requests/second
+    #
+    # 2. burst: Maximum number of requests allowed in a short time
+    #    - Defaults to 1
+    #    - Allows temporary traffic spikes
+    #    - Example: Allow up to 50 requests in a burst
+    #
+    # 3. period: Time period for rate calculation (optional)
+    #    - Defaults to 1 second
+    #    - Allows defining rates like requests per minute
+    #    - Example: 6 requests per minute
+    #
+    # 4. sourceCriterion: Define how to group request sources
+    #    - Options: IP Strategy, Request Header, Request Host
+    #    - Determines what defines a "source" for rate limiting
+    #
+    # Use Cases:
+    # - Protect services from excessive traffic
+    # - Implement fair usage policies
+    # - Prevent potential DoS attacks
+    #
+    # Best Practices:
+    # - Start with conservative rate limits
+    # - Adjust based on service performance
+    # - Consider different limits for different endpoints
+    test-ratelimit:
+      rateLimit:
+        average: 100 # 100 requests per second
+        burst: 50 # Allow 50 request burst
+
+    test-ratelimit2:
+      rateLimit:
+        average: 100 # 100 requests per second, default burst of 1
+
+    test-ratelimit3:
+      rateLimit:
+        burst: 100 # 100 request burst, no average limit
+
+    test-ratelimit4:
+      rateLimit:
+        sourceCriterion:
+          ipStrategy:
+            excludedIPs: # Exclude specific IPs from rate limiting
+              - "127.0.0.1/32"
+              - "192.168.1.7"
+
+    test-ratelimit5:
+      rateLimit:
+        sourceCriterion:
+          requestHeaderName: username # Rate limit based on username header
+
+    test-ratelimit6:
+      rateLimit:
+        sourceCriterion:
+          requestHost: true # Rate limit based on request host
+    ########################################################
+    # RedirectRegex Middleware: URL Redirection with Regex Matching
+    ########################################################
+    # Purpose: Redirect requests from one URL pattern to another using regular expression
+    #
+    # Key Features:
+    # - Matches URLs based on a defined regex pattern
+    # - Replaces matched URLs with a new target URL
+    # - Useful for:
+    #   * Domain migrations
+    #   * URL normalization
+    #   * Handling legacy or deprecated URL structures
+    #
+    # Configuration Details:
+    # - regex: Defines the pattern to match in the original URL
+    #   * "^http://localhost/(.*)" matches any URL starting with http://localhost/
+    #   * Captures everything after localhost/ using (.*)
+    #
+    # - replacement: Defines the new URL structure
+    #   * "http://mydomain/${1}" redirects to mydomain with the original path preserved
+    #   * ${1} references the first (and only) captured group from the regex
+    #
+    # Best Practices:
+    # - Use ${1}, ${2}, etc. for captured groups (not $1x)
+    # - Test regex patterns using tools like Go Playground or Regex101
+    # - Consider adding 'permanent: true' for SEO-friendly permanent redirects
+    test-redirectregex:
+      redirectRegex:
+        regex: "^http://localhost/(.*)"
+        replacement: "http://mydomain/${1}"
+    ########################################################
+    # RedirectScheme Middleware: Scheme and Port Redirection
+    ########################################################
+    # Purpose: Redirect requests from one scheme/protocol to another
+    #
+    # Key Features:
+    # - Redirects HTTP traffic to HTTPS
+    # - Supports changing ports during redirection
+    # - Configurable permanent or temporary redirects
+    #
+    # Configuration Options:
+    # 1. scheme: Defines the target scheme for redirection
+    #    - Common values: 'http', 'https'
+    #    - Determines the protocol of the new URL
+    #    - Example: Redirect from HTTP to HTTPS
+    #
+    # 2. permanent: Controls the type of HTTP redirect
+    #    - true: Sends a 301 Permanent Redirect (SEO-friendly)
+    #    - false: Sends a 302 Temporary Redirect
+    #    - Recommended for stable, long-term URL changes
+    #
+    # 3. port: Specifies the target port for the new URL
+    #    - Provided as a string (not a numeric value)
+    #    - Allows changing the port during redirection
+    #    - Common HTTPS port: "443"
+    #
+    # Use Cases:
+    # - Enforcing HTTPS across all services
+    # - Migrating services to different ports
+    # - Standardizing URL access patterns
+    #
+    # Best Practices:
+    # - Use permanent redirects for stable infrastructure
+    # - Specify both scheme and port for complete redirection
+    # - Consider security implications of redirects
+    test-redirectscheme:
+      redirectScheme:
+        scheme: https # Redirect to HTTPS
+        permanent: true # Permanent 301 redirect
+        port: "443" # Standard HTTPS port
+
+    test-redirectscheme2:
+      redirectScheme:
+        scheme: https # Another HTTPS redirect example
+        permanent: true # Permanent redirection
+
+    test-redirectscheme3:
+      redirectScheme:
+        scheme: https # Simple HTTPS redirect
+        permanent: false # Temporary redirect (302)
+
+    test-redirectscheme4:
+      redirectScheme:
+        scheme: https # HTTPS redirect with specific port
+        port: "8443" # Non-standard HTTPS port
+        permanent: true
+    ########################################################
+    # ReplacePath Middleware: Path Replacement
+    ########################################################
+    # Purpose: Replace the path of the request URL before forwarding
+    #
+    # Key Features:
+    # - Replaces the entire path of the incoming request
+    # - Stores the original path in X-Replaced-Path header
+    # - Useful for:
+    #   * URL path normalization
+    #   * Routing to different backend paths
+    #   * Simplifying complex routing configurations
+    #
+    # Configuration Options:
+    # - path: Defines the new path to replace the original
+    #   * Completely replaces the request's path
+    #   * Useful for mapping different URL structures
+    #
+    # Use Cases:
+    # - Migrating services with different path structures
+    # - Standardizing API endpoint paths
+    # - Hiding internal path complexities
+    #
+    # Best Practices:
+    # - Ensure the new path matches the backend service's expected path
+    # - Use carefully to avoid breaking application routing
+    # - Test thoroughly to verify correct path replacement
+    test-replacepath:
+      replacePath:
+        path: "/foo" # Replace path with /foo
+    test-replacepath2:
+      replacePath:
+        path: "/api/v1" # Example of API versioning path replacement
+    test-replacepath3:
+      replacePath:
+        path: "/admin" # Example of admin path replacement
+
+    ########################################################
+    # ReplacePathRegex Middleware: Regex-based Path Replacement
+    ########################################################
+    # Purpose: Replace the path of the request URL using regex matching
+    #
+    # Key Features:
+    # - Uses regular expressions to match and replace paths
+    # - Stores the original path in X-Replaced-Path header
+    # - Powerful for complex path transformations
+    #
+    # Configuration Options:
+    # - regex: Regular expression to match the original path
+    # - replacement: New path with optional capture group expansions
+    #   * Use $1, $2, etc. to reference captured groups
+    #   * Careful with syntax: use ${1} instead of $1x
+    #
+    # Use Cases:
+    # - Advanced URL path rewriting
+    # - API versioning with complex routing
+    # - Extracting or modifying path segments
+    #
+    # Best Practices:
+    # - Test regex thoroughly using tools like Regex101
+    # - Use capture groups for flexible replacements
+    # - Ensure replacement matches backend service expectations
+    test-replacepathregex:
+      replacePathRegex:
+        regex: "^/foo/(.*)" # Match paths starting with /foo/
+        replacement: "/bar/${1}" # Replace with /bar/ and preserve captured path
+    test-replacepathregex2:
+      replacePathRegex:
+        regex: "^/api/v1/(.*)" # Match API v1 paths
+        replacement: "/api/v2/${1}" # Upgrade to v2 API
+    test-replacepathregex3:
+      replacePathRegex:
+        regex: "^/user/profile/(\\d+)" # Match user profile with ID
+        replacement: "/profile/${1}" # Simplify path structure
+
+    ########################################################
+    # Retry Middleware: Retrying until it Succeeds
+    ########################################################
+    # Purpose: Reissue a request a given number of times to a backend server
+    #
+    # Key Features:
+    # - Retries requests if the server does not reply
+    # - Stops retrying as soon as the server responds
+    # - Configurable number of retry attempts
+    #
+    # Configuration Options:
+    # - attempts: Mandatory option defining how many times the request should be retried
+    #
+    # Use Cases:
+    # - Handling temporary network issues
+    # - Improving service reliability
+    # - Mitigating transient backend failures
+    #
+    # Best Practices:
+    # - Use a reasonable number of retry attempts
+    # - Consider the impact on overall request latency
+    # - Ensure idempotent requests for safe retries
+    test-retry:
+      retry:
+        attempts: 4 # Retry to send request 4 times
+    test-retry2:
+      retry:
+        attempts: 3 # Alternative retry configuration
+    test-retry3:
+      retry:
+        attempts: 5 # More aggressive retry strategy
+    ########################################################
+    # StripPrefix Middleware: Removing Prefixes From the Path
+    ########################################################
+    # Purpose: Remove specified prefixes from the URL path before forwarding the request
+    #
+    # Key Features:
+    # - Strips matching path prefixes from the request URL
+    # - Stores the matching path prefix in X-Forwarded-Prefix header
+    # - Useful for routing backends that listen on root path (/)
+    #
+    # Configuration Options:
+    # - prefixes: List of path prefixes to strip
+    #
+    # Use Cases:
+    # - Routing services with different base paths
+    # - Simplifying backend URL handling
+    # - Supporting microservices with varied path structures
+    #
+    # Best Practices:
+    # - Ensure backend returns relative URLs correctly
+    # - Use X-Forwarded-Prefix for dynamic URL construction
+    test-stripprefix:
+      stripPrefix:
+        prefixes:
+          - "/products"
+          - "/api/v1"
+    test-stripprefix2:
+      stripPrefix:
+        prefixes:
+          - "/admin"
+    test-stripprefix3:
+      stripPrefix:
+        prefixes:
+          - "/services"
+          - "/backend"
+    ########################################################
+    # StripPrefixRegex Middleware: Removing Prefixes From the Path Using Regex
+    ########################################################
+    # Purpose: Remove matching path prefixes from the URL path using regular expressions
+    #
+    # Key Features:
+    # - Strips path prefixes matching a specified regex pattern
+    # - Stores the matching path prefix in X-Forwarded-Prefix header
+    # - Useful for backends listening on root path (/) with complex path structures
+    #
+    # Configuration Options:
+    # - regex: Regular expression to match path prefixes
+    #
+    # Use Cases:
+    # - Routing services with dynamic or complex path patterns
+    # - Handling microservices with variable path segments
+    # - Flexible path manipulation for backend routing
+    #
+    # Best Practices:
+    # - Test regex patterns thoroughly using tools like Regex101
+    # - Ensure backend can handle stripped paths and return relative URLs
+    # - Use X-Forwarded-Prefix for dynamic URL reconstruction
+    # - Consider path matching complexity and performance
+    test-stripprefixregex:
+      stripPrefixRegex:
+        regex: "/products/[a-z0-9]+/[0-9]+/"
+    test-stripprefixregex2:
+      stripPrefixRegex:
+        regex: "/api/v[0-9]+/users/[a-z]+"
+    test-stripprefixregex3:
+      stripPrefixRegex:
+        regex: "/services/[a-z]+/[0-9]{3}/"
+#[http.services]
+# ... definition of error-handler-service and my-service
