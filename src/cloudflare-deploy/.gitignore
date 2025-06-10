@@ -1,0 +1,17 @@
+# Cloudflare build outputs
+.vercel/
+dist/
+.wrangler/
+.dev.vars
+
+# Dependencies
+node_modules/
+
+# Build artifacts
+*.log
+npm-debug.log*
+.DS_Store
+
+# Temporary files
+.tmp/
+temp/ 

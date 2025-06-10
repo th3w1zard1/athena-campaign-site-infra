@@ -1,0 +1,167 @@
+# Example environment variables for local development
+# Copy this file to .dev.vars and add your actual values
+
+# ==============================================
+# CORE APPLICATION SETTINGS
+# ==============================================
+NODE_ENV=development
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_NAME="Athena for Eugene"
+
+# ==============================================
+# AUTHENTICATION & SESSION
+# ==============================================
+# NextAuth.js / Auth.js configuration
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_nextauth_secret_here
+# Auth0 configuration (if using)
+# AUTH0_SECRET=your_auth0_secret
+# AUTH0_BASE_URL=http://localhost:3000
+# AUTH0_ISSUER_BASE_URL=https://your-tenant.auth0.com
+# AUTH0_CLIENT_ID=your_auth0_client_id
+# AUTH0_CLIENT_SECRET=your_auth0_client_secret
+# Clerk configuration (if using)
+# NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+# CLERK_SECRET_KEY=your_clerk_secret_key
+
+# ==============================================
+# DATABASE CONFIGURATION
+# ==============================================
+# PostgreSQL with Prisma
+DATABASE_URL=postgresql://username:password@localhost:5432/athena_campaign
+# MongoDB
+# MONGODB_URI=mongodb://localhost:27017/athena_campaign
+# Supabase
+# DATABASE_URL=your_supabase_database_url
+# NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+# Turso (SQLite for production)
+# TURSO_DATABASE_URL=your_turso_url
+# TURSO_AUTH_TOKEN=your_turso_token
+
+# ==============================================
+# EMAIL SERVICES
+# ==============================================
+# Resend (recommended for campaigns)
+RESEND_API_KEY=your_resend_api_key
+RESEND_FROM_EMAIL=noreply@athenaforeugene.org
+# SendGrid
+# SENDGRID_API_KEY=your_sendgrid_api_key
+# SENDGRID_FROM_EMAIL=noreply@athenaforeugene.org
+# Mailchimp for newsletter management
+# MAILCHIMP_API_KEY=your_mailchimp_api_key
+# MAILCHIMP_AUDIENCE_ID=your_mailchimp_audience_id
+# MAILCHIMP_SERVER_PREFIX=us1
+
+# ==============================================
+# PAYMENT PROCESSING
+# ==============================================
+# Stripe for donations
+STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=whsec_your_stripe_webhook_secret
+# PayPal (alternative payment processor)
+# NEXT_PUBLIC_PAYPAL_CLIENT_ID=your_paypal_client_id
+# PAYPAL_CLIENT_SECRET=your_paypal_client_secret
+
+# ==============================================
+# ANALYTICS & TRACKING
+# ==============================================
+# Google Analytics 4
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+# Google Tag Manager
+# NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX
+# Facebook Pixel
+# NEXT_PUBLIC_FACEBOOK_PIXEL_ID=your_pixel_id
+# Plausible Analytics (privacy-focused alternative)
+# NEXT_PUBLIC_PLAUSIBLE_DOMAIN=athenaforeugene.org
+
+# ==============================================
+# CONTENT MANAGEMENT
+# ==============================================
+# Sanity CMS (for blog/news content)
+# NEXT_PUBLIC_SANITY_PROJECT_ID=your_sanity_project_id
+# NEXT_PUBLIC_SANITY_DATASET=production
+# SANITY_API_TOKEN=your_sanity_api_token
+# Contentful
+# CONTENTFUL_SPACE_ID=your_contentful_space_id
+# CONTENTFUL_ACCESS_TOKEN=your_contentful_access_token
+
+# ==============================================
+# FILE STORAGE & MEDIA
+# ==============================================
+# AWS S3 for file uploads
+# AWS_REGION=us-west-2
+# AWS_ACCESS_KEY_ID=your_aws_access_key
+# AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+# AWS_S3_BUCKET_NAME=athena-campaign-assets
+# Cloudinary for image optimization
+# NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+# CLOUDINARY_API_KEY=your_cloudinary_api_key
+# CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+# ==============================================
+# COMMUNICATION & MESSAGING
+# ==============================================
+# Twilio for SMS notifications
+# TWILIO_ACCOUNT_SID=your_twilio_account_sid
+# TWILIO_AUTH_TOKEN=your_twilio_auth_token
+# TWILIO_PHONE_NUMBER=+1234567890
+# Slack for team notifications
+# SLACK_WEBHOOK_URL=your_slack_webhook_url
+
+# ==============================================
+# MAPS & LOCATION
+# ==============================================
+# Google Maps for event locations
+# NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+
+# ==============================================
+# SOCIAL MEDIA INTEGRATION
+# ==============================================
+# Twitter/X API for social media integration
+# TWITTER_API_KEY=your_twitter_api_key
+# TWITTER_API_SECRET=your_twitter_api_secret
+# TWITTER_ACCESS_TOKEN=your_twitter_access_token
+# TWITTER_ACCESS_TOKEN_SECRET=your_twitter_access_token_secret
+
+# ==============================================
+# ERROR MONITORING & LOGGING
+# ==============================================
+# Sentry for error tracking
+# NEXT_PUBLIC_SENTRY_DSN=your_sentry_dsn
+# SENTRY_AUTH_TOKEN=your_sentry_auth_token
+# SENTRY_ORG=your_sentry_org
+# SENTRY_PROJECT=your_sentry_project
+
+# ==============================================
+# SECURITY & ENCRYPTION
+# ==============================================
+# Encryption key for sensitive data
+ENCRYPTION_KEY=your_32_character_encryption_key_here
+# Session secret for stateless sessions
+SESSION_SECRET=your_session_secret_here
+
+# ==============================================
+# FEATURE FLAGS & A/B TESTING
+# ==============================================
+# LaunchDarkly or similar feature flag service
+# LAUNCHDARKLY_SDK_KEY=your_launchdarkly_sdk_key
+# NEXT_PUBLIC_LAUNCHDARKLY_CLIENT_ID=your_launchdarkly_client_id
+
+# ==============================================
+# RATE LIMITING & SECURITY
+# ==============================================
+# Upstash Redis for rate limiting
+# UPSTASH_REDIS_REST_URL=your_upstash_redis_url
+# UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
+
+# ==============================================
+# DEVELOPMENT TOOLS
+# ==============================================
+# Webhook testing with ngrok or similar
+# WEBHOOK_URL=https://your-ngrok-url.ngrok.io
+
+# Email service configuration (if using newsletter signup)
+# SENDGRID_API_KEY=your_sendgrid_key
+# MAILCHIMP_API_KEY=your_mailchimp_key

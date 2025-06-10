@@ -1,0 +1,29 @@
+{
+  "name": "athena-campaign-cloudflare-deploy",
+  "version": "1.0.0",
+  "description": "Cloudflare Pages deployment for Athena Campaign Website",
+  "private": true,
+  "scripts": {
+    "dev": "cd ../web && npm install && npm run dev",
+    "build": "cd ../web && npm install && npm run build",
+    "pages:build": "cd ../web && npm install && npx @cloudflare/next-on-pages",
+    "preview": "npm run pages:build && wrangler pages dev ../web/.vercel/output/static --port=3000",
+    "deploy": "cd ../web && npm install && npm run build && npx @cloudflare/next-on-pages && cd ../cloudflare-deploy && wrangler pages deploy ../web/.vercel/output/static",
+    "deploy:production": "cd ../web && npm install && npm run build && npx @cloudflare/next-on-pages && cd ../cloudflare-deploy && wrangler pages deploy ../web/.vercel/output/static --env production",
+    "deploy:preview": "cd ../web && npm install && npm run build && npx @cloudflare/next-on-pages && cd ../cloudflare-deploy && wrangler pages deploy ../web/.vercel/output/static --env preview",
+    "check": "wrangler pages project list",
+    "logs": "wrangler pages deployment tail",
+    "logs:production": "wrangler pages deployment tail --env production",
+    "logs:preview": "wrangler pages deployment tail --env preview",
+    "status": "wrangler pages project show athena-for-eugene",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+  },
+  "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.12",
+    "vercel": "^42.3.0",
+    "wrangler": "^4.19.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

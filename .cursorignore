@@ -1,5 +1,4 @@
 *.history
 *docker_volume_data
-node_modules
 configs/code-server/campaign/config
 start.sh

@@ -19,24 +19,22 @@ x-common-logging: &common-logging
 services:
   campaign:
     build:
-      context: ./src
+      context: ./src/web
       dockerfile: Dockerfile
     image: th3w1zard1/nextjs-campaign-website:latest
     container_name: campaign
     hostname: campaign
     networks:
       - publicnet
+    expose:
+      - 3000
     environment:
       <<: *common-env
     volumes:
       # Mount the entire Next.js project for live development
-      - ${SRC_PATH:-./src}:/app
+      - ${SRC_PATH:-./src}/web:/app
       # Preserve node_modules from the container (don't overwrite with host)
       - /app/node_modules
-    expose:
-      - 3000
-#    ports:
-#      - "${CAMPAIGN_PORT:-8039}:3000"
     labels:
       traefik.enable: "true"
       traefik.http.routers.campaign.middlewares: tinyauth@docker  # protect from public eyes and scraping with a login page.

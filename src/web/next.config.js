@@ -38,10 +38,6 @@ const nextConfig = {
       },
     ];
   },
-  // Disable dev origin checks - allow everything
-  experimental: {
-    allowedDevOrigins: true,
-  },
 };
 
 module.exports = nextConfig; 
