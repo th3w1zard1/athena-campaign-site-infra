@@ -15,7 +15,7 @@
     "logs": "wrangler pages deployment tail",
     "logs:production": "wrangler pages deployment tail --env production",
     "logs:preview": "wrangler pages deployment tail --env preview",
-    "status": "wrangler pages project show athena-for-eugene",
+    "status": "wrangler pages project show athena-site",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "devDependencies": {

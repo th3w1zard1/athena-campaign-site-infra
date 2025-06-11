@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "athena-for-eugene",
+  "name": "athena-site",
   "compatibility_date": "2024-12-15",
   "compatibility_flags": [
     "nodejs_compat"
