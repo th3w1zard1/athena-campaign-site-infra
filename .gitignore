@@ -185,3 +185,5 @@ secrets
 .env
 /.cursor/rules
 /.cursor/rules-new
+/certs
+.configs/traefik/certs/acme.json
