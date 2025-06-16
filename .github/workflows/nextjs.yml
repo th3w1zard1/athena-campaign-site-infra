@@ -86,9 +86,6 @@ jobs:
 
   # Deployment job
   deploy:
-    defaults:
-      run:
-        working-directory: src/web
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
