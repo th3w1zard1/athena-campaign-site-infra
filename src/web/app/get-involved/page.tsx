@@ -300,7 +300,7 @@ export default function GetInvolvedPage() {
               <div className="platform-card interactive-card">
                 <h3 className="text-xl font-bold text-foreground mb-4">Write a Letter to the Editor</h3>
                 <p className="text-muted-foreground mb-4">
-                  Submit letters to local newspapers supporting Athena's candidacy.
+                  Submit letters to local newspapers supporting Athena&apos;s candidacy.
                 </p>
                 <div className="space-y-3">
                   <a 
