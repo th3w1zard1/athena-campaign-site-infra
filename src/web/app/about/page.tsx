@@ -97,7 +97,7 @@ export default function AboutPage() {
 
               <h3 className="text-foreground">Economic Opportunity for All</h3>
               <p className="text-muted-foreground">
-                Eugene deserves an economy that works for everyone. I'm committed to policies that
+                Eugene deserves an economy that works for everyone. I&apos;m committed to policies that
                 create good-paying jobs, support small businesses, ensure corporations pay their fair share,
                 and ensure that economic growth benefits all residents, not just a select few.
               </p>
@@ -112,7 +112,7 @@ export default function AboutPage() {
 
               <h3 className="text-foreground">Justice and Equality</h3>
               <p className="text-muted-foreground">
-                I am committed to fighting for women's rights, including strengthening protections for
+                I am committed to fighting for women&apos;s rights, including strengthening protections for
                 sexual assault survivors. I will also work to decriminalize drug use and focus on
                 treatment rather than criminalization. Every person deserves dignity, respect, and equal
                 protection under the law.

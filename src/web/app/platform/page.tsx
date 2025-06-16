@@ -181,7 +181,7 @@ export default function PlatformPage() {
               My Platform for Eugene
             </h1>
             <p className="text-xl text-primary-100">
-              A comprehensive plan to address our community's most pressing challenges and create opportunities for all residents.
+              A comprehensive plan to address our community&apos;s most pressing challenges and create opportunities for all residents.
             </p>
           </div>
         </div>

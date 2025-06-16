@@ -78,7 +78,7 @@ export default function IssuesPage() {
               Key Issues for Ward 5
             </h1>
             <p className="text-xl text-primary-100">
-              The challenges facing our community require bold, progressive solutions. Here's where I stand on the issues that matter most.
+              The challenges facing our community require bold, progressive solutions. Here&apos;s where I stand on the issues that matter most.
             </p>
           </div>
         </div>

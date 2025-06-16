@@ -63,7 +63,7 @@ const ContactPage = () => {
               Contact Us
             </h1>
             <p className="text-xl text-primary-100">
-              Have questions, feedback, or want to get involved? We'd love to hear from you.
+              Have questions, feedback, or want to get involved? We&apos;d love to hear from you.
             </p>
           </div>
         </div>

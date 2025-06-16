@@ -109,7 +109,7 @@ export default function GetInvolvedPage() {
                 Volunteer Sign-Up
               </h2>
               <p className="text-xl text-muted-foreground">
-                Ready to make a difference? Fill out the form below and we'll connect you with volunteer opportunities that match your interests.
+                Ready to make a difference? Fill out the form below and we&apos;ll connect you with volunteer opportunities that match your interests.
               </p>
             </div>
 
@@ -200,7 +200,7 @@ export default function GetInvolvedPage() {
 
                   <div>
                     <label htmlFor="other" className="block text-muted-foreground font-medium mb-2">
-                      Other interests or skills you'd like to contribute
+                      Other interests or skills you&apos;d like to contribute
                     </label>
                     <textarea
                       id="other"
@@ -208,7 +208,7 @@ export default function GetInvolvedPage() {
                       value={formData.other}
                       onChange={handleInputChange}
                       rows={3}
-                      placeholder="Tell us about other ways you'd like to help or special skills you have..."
+                      placeholder="Tell us about other ways you&apos;d like to help or special skills you have..."
                       className="block w-full px-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                     />
                   </div>
@@ -244,7 +244,7 @@ export default function GetInvolvedPage() {
                 Other Ways to Help
               </h2>
               <p className="text-xl text-muted-foreground">
-                Can't volunteer regularly? There are still many ways you can support our campaign and help spread the word.
+                Can&apos;t volunteer regularly? There are still many ways you can support our campaign and help spread the word.
               </p>
             </div>
 
@@ -268,7 +268,7 @@ export default function GetInvolvedPage() {
               <div className="platform-card interactive-card">
                 <h3 className="text-xl font-bold text-foreground mb-4">Share on Social Media</h3>
                 <p className="text-muted-foreground mb-4">
-                  Follow and share Athena's posts to help spread the word online.
+                  Follow and share Athena&apos;s posts to help spread the word online.
                 </p>
                 <div className="space-y-3">
                   <a 
@@ -342,7 +342,7 @@ export default function GetInvolvedPage() {
               <div className="platform-card interactive-card">
                 <h3 className="text-xl font-bold text-foreground mb-4">Display a Yard Sign</h3>
                 <p className="text-muted-foreground mb-4">
-                  Already have a sign? Here's how to maximize its impact.
+                  Already have a sign? Here&apos;s how to maximize its impact.
                 </p>
                 <a 
                   href="/contact?subject=Yard%20Sign%20Tips" 

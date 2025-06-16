@@ -29,7 +29,6 @@ const DonationSection = () => {
 
       const scrollPosition = window.scrollY;
       const documentHeight = document.documentElement.scrollHeight;
-      const windowHeight = window.innerHeight;
       
       // Show popup when user has scrolled down 30% of the page or 500px, whichever comes first
       const scrollThreshold = Math.min(documentHeight * 0.3, 500);
