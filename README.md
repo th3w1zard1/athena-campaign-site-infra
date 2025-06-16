@@ -29,14 +29,14 @@ in the root of the repo is a TODO_LIST.md which keeps track of my changelogs sin
 ### Docker
 
 ```bash
-git clone https://github.com/th3w1zard1/athena-campaign-site-infra
+git clone https://github.com/th3w1zard1/campaign-infra
 docker compose up -d
 ```
 
 ### Cloudflare Pages deployment
 
 ```bash
-git clone https://github.com/th3w1zard1/athena-campaign-site-infra
+git clone https://github.com/th3w1zard1/campaign-infra
 cd src/cloudflare-deploy
 npm install
 npm run build
