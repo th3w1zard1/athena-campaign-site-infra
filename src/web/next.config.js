@@ -1,7 +1,13 @@
-module.exports = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   output: process.env.NEXT_OUTPUT || 'standalone',
   basePath: process.env.NEXT_BASE_PATH || '',
+  // Add trailing slash for static export compatibility
+  trailingSlash: true,
   images: {
-    unoptimized: process.env.NEXT_UNOPTIMIZED_IMAGES === 'false',
+    // Unoptimized images for static export (GitHub Pages doesn't support Next.js Image optimization)
+    unoptimized: process.env.NEXT_UNOPTIMIZED_IMAGES === 'true' || process.env.NEXT_OUTPUT === 'export',
   },
 };
+
+module.exports = nextConfig;
