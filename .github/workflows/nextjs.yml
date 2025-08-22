@@ -79,7 +79,9 @@ jobs:
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
       - name: Build with Next.js
-        run: NEXT_OUTPUT=export NEXT_UNOPTIMIZED_IMAGES=true NEXT_BASE_PATH=/campaign-infra NEXT_PUBLIC_BASE_PATH=/campaign-infra ${{ steps.detect-package-manager.outputs.runner }} next build
+        run: NEXT_BASE_PATH=/campaign-infra NEXT_PUBLIC_BASE_PATH=/campaign-infra ${{ steps.detect-package-manager.outputs.runner }} next build
+      - name: Add .nojekyll file
+        run: touch ./src/web/out/.nojekyll
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
